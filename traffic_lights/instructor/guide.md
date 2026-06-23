@@ -153,6 +153,44 @@ beats responsiveness, a callback to Day 2).
 
 ---
 
+## Day 3 Extension — Modularity & reuse (≈ 1.5 hrs, optional but high-value)
+
+**Aim:** rebuild the 4-way from a **reusable component** and feel why modularity
+matters. Worksheet: `day3_modular.md`. This is the strongest "real engineering"
+payoff in the pack.
+
+| Activity | Time | What to look for |
+|----------|------|------------------|
+| M.1 Spot the duplication | 15 min | They count the six-lamp pattern repeated per state in `create_junction_4way.m`. |
+| M.2 Meet the component | 15 min | The `TrafficLightUnit` interface (`go` / `r,a,g,is_red`) and what it deliberately *doesn't* know. |
+| M.3 Assemble & run | 20 min | `create_tl_lib; create_junction_modular; run_demo('Junction4WayModular')` — four arms, controller = policy only. |
+| M.4 One edit, four lights | 20 min | Change the unit once, rebuild, all four arms change. ★ the payoff |
+| M.5 Reuse the test | 10 min | `check_junction_safety('Junction4WayModular')` PASSes **unchanged**. |
+
+**How it's built.** `create_tl_lib.m` puts one `TrafficLightUnit` chart in a
+Simulink **library** (`tl_lib.slx`). `create_junction_modular.m` **links** it
+four times (N/S/E/W) and adds a tiny `Controller` chart that only sequences
+phases (`ns_go`/`ew_go`) and waits on each unit's `is_red` before swapping. The
+light behaviour exists in exactly one place.
+
+**Two teaching beats to land:**
+- *Edit once, change everywhere (M.4):* one timing change in the unit updates all
+  four arms — versus hunting through every state in the monolith.
+- *Interfaces enable test reuse (M.5):* both models expose `ns_green`/`ew_green`,
+  so the same checker proves both. Good interfaces are why you can reuse tools.
+
+**Talking points:** encapsulation (unit knows lights, not junctions; controller
+the reverse), separation of concerns, small interfaces, and "when is a reusable
+component worth the up-front effort?" (answer: when it's used many times and/or
+likely to change).
+
+**Note (don't skip):** the `is_red` feedback from units to controller would form
+an **algebraic loop**; a one-step **Unit Delay** (`d_ns`/`d_ew`) breaks it. If a
+strong student asks "why the delay block?", that's the answer — feedback between
+two state machines needs a step of delay.
+
+---
+
 ## Wrap-up conversation (15 min, end of Day 3)
 
 Ask them to explain, in their own words:
@@ -171,11 +209,19 @@ If they can answer those three, the week succeeded.
   gets a green that never overlaps vehicle green and the **amber genuinely
   flashes** in `PED_FLASH`; both junction approaches are served with no
   two-green overlap; and the 4-way **night mode flashes amber with no greens**
-  (invariant preserved).
+  (invariant preserved). The **modular** junction also builds (one library unit
+  linked 4×), simulates with all four arms, and the *same* `check_junction_safety`
+  PASSes on it unchanged.
 - **Benign warnings:** you may see "Unable to determine the default toolchain"
   (no C compiler configured) and "model name is shadowing" on rebuild. Neither
   stops simulation — the builders suppress the shadowing one and Stateflow runs
   without a C compiler here.
+- **Visual lamps:** each model has live **Dashboard Lamp** indicators bound to
+  the chart's lamp outputs (red/amber/green heads; a pedestrian head on the
+  Pelican). They light up during simulation. `run_demo` opens both the model
+  (to see the lamps) and the chart (to see the active state highlight) — run
+  them side by side. Dashboard blocks are part of base Simulink (R2015a+); no
+  extra toolbox needed.
 - **Manual Switch:** double-click it during a run to toggle. The on/off
   *position* is what matters to the student; they just click until the lights
   respond (programmatically the `sw` parameter is counter-intuitive: `'0'`

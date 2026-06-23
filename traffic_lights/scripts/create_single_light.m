@@ -42,5 +42,8 @@ function create_single_light()
     H.addOutputLogging(model, 'SingleLight', {'red', 'amber', 'green'});
     H.configDiscrete(model, 45);    % stop after 45 s (~3 full cycles)
 
-    H.finish(model, chart);
+    % --- visual: a traffic-light head that lights up during simulation ------
+    C = H.colors;
+    head = { {[700 40], [1 2 3], [C.red; C.amber; C.green]} };
+    H.finish(model, chart, head);
 end

@@ -27,7 +27,16 @@ function H = tl_helpers()
         'configDiscrete',@configDiscrete, ...
         'addOutputLogging', @addOutputLogging, ...
         'addManualInput',   @addManualInput, ...
+        'colors',        colourPalette(), ...
+        'addLampHead',   @addLampHead, ...
         'finish',        @finish);
+end
+
+function c = colourPalette()
+%COLOURPALETTE  Lamp colours used by the visual indicators (RGB, 0..1).
+    c = struct('red',   [0.85 0.00 0.00], ...
+               'amber', [1.00 0.65 0.00], ...
+               'green', [0.00 0.70 0.15]);
 end
 
 % ---------------------------------------------------------------------------
@@ -157,10 +166,60 @@ function addManualInput(model, chartName, inputPort)
     add_line(model, 'Press/1', sprintf('%s/%d', chartName, inputPort), 'autorouting', 'on');
 end
 
-function finish(model, chart)
-%FINISH  Auto-arrange, save and report, matching the repo's reporting style.
+function finish(model, chart, heads)
+%FINISH  Auto-arrange, add visual lamp indicators, save and report.
+%   HEADS (optional) describes one or more traffic-light "heads" to draw as
+%   live Dashboard Lamp indicators. It is a cell array, each element a cell:
+%       { [x y], portIndices, colourRows }
+%   where PORTINDICES are chart output ports (top-to-bottom) and COLOURROWS is
+%   an N-by-3 RGB matrix. Lamps light up during simulation -- much more
+%   engaging than reading a timing chart. They are added *after* the
+%   auto-arrange so their tidy stacked layout is preserved.
     Simulink.BlockDiagram.arrangeSystem(model);
+    if nargin >= 3 && ~isempty(heads)
+        addLampHeads(model, chart, heads);
+    end
     save_system(model);
     n = numel(chart.find('-isa', 'Stateflow.State'));
     fprintf('Built %s: %d states.\n', model, n);
+end
+
+% ---------------------------------------------------------------------------
+% Visual indicators (Dashboard Lamp blocks bound to chart outputs)
+% ---------------------------------------------------------------------------
+function addLampHeads(model, chart, heads)
+%ADDLAMPHEADS  Draw each traffic-light head bound to one chart's outputs.
+    chartBlk = [model '/' chart.Name];
+    for h = 1:numel(heads)
+        spec = heads{h};
+        addLampHead(model, chartBlk, spec{1}, spec{2}, spec{3});
+    end
+end
+
+function addLampHead(model, srcBlock, topLeft, ports, colours)
+%ADDLAMPHEAD  A vertical stack of lamps bound to output ports of SRCBLOCK.
+%   SRCBLOCK can be any block with output signals -- a Stateflow chart, or a
+%   linked library unit (used by the modular junction). TOPLEFT = [x y];
+%   PORTS = output-port indices (top-to-bottom); COLOURS = N-by-3 RGB.
+    sz = 50; gap = 14;
+    for i = 1:numel(ports)
+        x = topLeft(1);
+        y = topLeft(2) + (i - 1) * (sz + gap);
+        addLamp(model, srcBlock, ports(i), colours(i, :), [x y x+sz y+sz]);
+    end
+end
+
+function addLamp(model, chartBlk, portIndex, colour, pos)
+%ADDLAMP  One Dashboard Lamp bound to output PORTINDEX of the chart.
+%   Shows COLOUR when that lamp signal is 1, and a dark "off" colour otherwise.
+    lib = 'simulink_hmi_blocks';
+    if ~bdIsLoaded(lib), load_system(lib); end
+    name = sprintf('%s/lamp_%s_%d', model, get_param(chartBlk, 'Name'), portIndex);
+    add_block([lib '/Lamp'], name, 'Position', pos);
+    ss = Simulink.HMI.SignalSpecification;
+    ss.BlockPath       = Simulink.BlockPath(chartBlk);
+    ss.OutputPortIndex = portIndex;
+    set_param(name, 'Binding',      ss);
+    set_param(name, 'StateColors',  struct('Value', 1, 'Color', colour));
+    set_param(name, 'ColorDefault', [0.15 0.15 0.15]);   % dark = lamp off
 end

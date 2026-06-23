@@ -79,5 +79,9 @@ function create_pelican()
         {'veh_red', 'veh_amber', 'veh_green', 'ped_red', 'ped_green'});
     H.configDiscrete(model, 60);
 
-    H.finish(model, chart);
+    % --- visual: a vehicle head (R/A/G) beside a pedestrian head (R/G) ------
+    C = H.colors;
+    heads = { {[700 40], [1 2 3], [C.red; C.amber; C.green]}, ...   % vehicles
+              {[820 40], [4 5],   [C.red; C.green]} };               % pedestrians
+    H.finish(model, chart, heads);
 end

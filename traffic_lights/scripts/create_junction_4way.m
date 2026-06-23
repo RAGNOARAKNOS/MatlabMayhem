@@ -107,7 +107,11 @@ function create_junction_4way()
         {'ns_red','ns_amber','ns_green','ew_red','ew_amber','ew_green'});
     H.configDiscrete(model, 80);
 
-    H.finish(model, chart);
+    % --- visual: one head per approach (NS and EW) --------------------------
+    C = H.colors;
+    heads = { {[860 40], [1 2 3], [C.red; C.amber; C.green]}, ...   % NS approach
+              {[980 40], [4 5 6], [C.red; C.amber; C.green]} };      % EW approach
+    H.finish(model, chart, heads);
 end
 
 function addSensorSwitch(model, tag, chartName, inputPort, y)

@@ -1,10 +1,11 @@
 function out = run_demo(model, stopTime)
 %RUN_DEMO  Simulate a traffic-light model and plot every logged lamp signal.
 %
-%   run_demo(MODEL) loads MODEL (e.g. 'TrafficLight'), opens its Stateflow
-%   chart so you can watch the states light up during the run, simulates it,
-%   and draws a timing chart of every logged output as a stack of stairs
-%   plots. This is the "watch it work" step at the end of each day.
+%   run_demo(MODEL) loads MODEL (e.g. 'TrafficLight'), opens the model (so the
+%   coloured Dashboard Lamp indicators light up live) and its Stateflow chart
+%   (so the active state highlights), simulates it, and draws a timing chart of
+%   every logged output as a stack of stairs plots. This is the "watch it work"
+%   step at the end of each day.
 %
 %   run_demo(MODEL, STOPTIME) overrides the stop time (seconds).
 %
@@ -20,7 +21,11 @@ function out = run_demo(model, stopTime)
         set_param(model, 'StopTime', num2str(stopTime));
     end
 
-    % Open the chart so Stateflow animation highlights the active state.
+    % Open the model canvas so the Dashboard Lamp indicators are visible and
+    % light up live during the run.
+    open_system(model);
+
+    % Also open the chart so Stateflow animation highlights the active state.
     % (A Stateflow chart is opened via its own view/Path, not open_system(obj).)
     charts = find(sfroot, '-isa', 'Stateflow.Chart');
     charts = charts(arrayfun(@(c) startsWith(c.Path, [model '/']), charts));
@@ -30,8 +35,6 @@ function out = run_demo(model, stopTime)
         catch
             open_system(charts(1).Path); % fallback: open the chart block by path
         end
-    else
-        open_system(model);             % no chart found: just show the model
     end
 
     out = sim(model);

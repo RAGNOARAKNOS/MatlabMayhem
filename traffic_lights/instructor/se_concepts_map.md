@@ -28,6 +28,13 @@ systems-engineering thinking.
 | **Abstraction & decomposition** | Day 3 (3.4 discussion) | splitting a big machine into small ones |
 | **State explosion & how to tame it** | Day 3 (3.4 discussion) | hierarchy + parallelism |
 | **Model as data / introspection** | Day 3 (3.5) | `slx2script` regenerating the chart |
+| **Modularity / reusable components** | Day 3 ext (M.2–M.3) | `TrafficLightUnit` linked 4× in `Junction4WayModular` |
+| **Encapsulation / information hiding** | Day 3 ext (M.2) | unit knows lights, not junctions; controller the reverse |
+| **Interfaces / contracts** | Day 3 ext (M.2, M.5) | `go` / `is_red` between unit and controller |
+| **Separation of concerns** | Day 3 ext (M.3) | controller = policy, unit = light behaviour |
+| **Maintainability (edit once, reuse everywhere)** | Day 3 ext (M.4) | one unit edit → all four arms change |
+| **Test reuse via stable interfaces** | Day 3 ext (M.5) | same `check_junction_safety` passes both builds |
+| **Breaking algebraic loops (unit delay)** | Day 3 ext (M.3 aside) | `d_ns`/`d_ew` on the `is_red` feedback |
 | **Iterate: design → build → run → check** | Every day (1.4, 2.x, 3.x) | the working loop itself |
 
 ## The through-line (one sentence)

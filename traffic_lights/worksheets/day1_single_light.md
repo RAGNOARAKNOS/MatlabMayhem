@@ -48,8 +48,15 @@ create_single_light          % builds TrafficLight.slx
 run_demo('TrafficLight')     % runs it and draws the timing chart
 ```
 
-While it runs, watch the chart: the **active state lights up**. That highlight
-moving around the chart *is* your paper diagram coming alive.
+Two windows open. Watch **both**:
+
+- the **model**, where three coloured lamps (🔴 🟠 🟢) light up just like a real
+  traffic light;
+- the **chart**, where the **active state highlights** as it moves around — that
+  highlight *is* your paper diagram coming alive.
+
+Run them side by side and watch the lamp change exactly as the highlighted state
+changes.
 
 ---
 
