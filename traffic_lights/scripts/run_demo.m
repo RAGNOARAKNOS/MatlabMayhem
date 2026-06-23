@@ -21,9 +21,18 @@ function out = run_demo(model, stopTime)
     end
 
     % Open the chart so Stateflow animation highlights the active state.
+    % (A Stateflow chart is opened via its own view/Path, not open_system(obj).)
     charts = find(sfroot, '-isa', 'Stateflow.Chart');
     charts = charts(arrayfun(@(c) startsWith(c.Path, [model '/']), charts));
-    if ~isempty(charts), open_system(charts(1)); end
+    if ~isempty(charts)
+        try
+            charts(1).view;             % open the Stateflow editor for animation
+        catch
+            open_system(charts(1).Path); % fallback: open the chart block by path
+        end
+    else
+        open_system(model);             % no chart found: just show the model
+    end
 
     out = sim(model);
 
